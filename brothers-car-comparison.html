@@ -722,14 +722,25 @@ function toHMFull(hrs) {
 
 /* Speed cards */
 function buildSpeedCards() {
+  const baseHrs = tDist / tMph;
   document.getElementById('speed-cards').innerHTML = speeds.map(s=>{
-    const hrs = tDist/s;
+    const hrs = tDist / s;
     const col = speedColors[s];
-    const active = s===tMph ? 'is-active' : '';
-    return `<div class="scard ${active}" style="--sc:${col}">
+    const isActive = s === tMph;
+    const deltaHrs = hrs - baseHrs;
+    const absDelta = Math.abs(deltaHrs);
+    const dh = Math.floor(absDelta);
+    const dm = Math.round((absDelta - dh) * 60);
+    const deltaStr = (dh === 0 ? '' : dh + 'h ') + String(dm).padStart(2,'0') + 'm';
+    const sign = deltaHrs < 0 ? '−' : '+';
+    const deltaColor = isActive ? '' : (deltaHrs < 0 ? '#3dd68c' : '#ff8c42');
+    const subLine = isActive
+      ? toHMFull(hrs)
+      : `<span style="color:${deltaColor};font-weight:500;">${sign} ${deltaStr}</span>`;
+    return `<div class="scard ${isActive ? 'is-active' : ''}" style="--sc:${col}">
       <div class="scard-mph">${s} mph</div>
       <div class="scard-time">${toHM(hrs)}</div>
-      <div class="scard-hrs">${toHMFull(hrs)}</div>
+      <div class="scard-hrs">${subLine}</div>
     </div>`;
   }).join('');
 }
